@@ -44,6 +44,10 @@
       </div>
     </div>
 
+    <div id="admin-notifications">
+      <h1>Admin notifications</h1>
+    </div>
+
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -58,6 +62,7 @@
       $('#main-header').text(username)
 
       var socket = io.connect()
+      var $adminNotifications = $('#admin-notifications')
       var $form = $("#messForm")
       var $textInput = $("#message")
       var $allMessages = $("#all_mess")
@@ -67,34 +72,42 @@
 
       $name.val(username)
 
-      socket.on('render messages', function (messages) {
-        messages.forEach(function (msg) {
-          $allMessages.append(`<div><p><b>${msg.name}</b></p><p>${msg.message}</p></div>`)
-        })
-        socket.removeListener('render messages')
-      })
-
-      $form.submit(function (event) {
+      socket.emit('join', { username: username })
+      $form.submit(function(event) {
         event.preventDefault()
-        socket.emit('send mess', {
-          name: $name.val(),
-          message: $textInput.val()
-        })
-        $textInput.val('')
       })
 
-      socket.on('add mess', function (response) {
-        $allMessages.append(`<div><p><b>${response.msg.name}</b></p><p>${response.msg.message}</p></div>`)
+      socket.on('admin says', function(data) {
+        console.log(`Recieved message from admin: ${data.message}`)
       })
+      // socket.on('render messages', function (messages) {
+      //   messages.forEach(function (msg) {
+      //     $allMessages.append(`<div><p><b>${msg.name}</b></p><p>${msg.message}</p></div>`)
+      //   })
+      //   socket.removeListener('render messages')
+      // })
 
-      $resetBtn.on('click', function (e) {
-        e.preventDefault()
-        socket.emit('reset chat')
-      })
+      // $form.submit(function (event) {
+      //   event.preventDefault()
+      //   socket.emit('send mess', {
+      //     name: $name.val(),
+      //     message: $textInput.val()
+      //   })
+      //   $textInput.val('')
+      // })
 
-      socket.on('reset', function () {
-        $allMessages.html('')
-      })
+      // socket.on('add mess', function (response) {
+      //   $allMessages.append(`<div><p><b>${response.msg.name}</b></p><p>${response.msg.message}</p></div>`)
+      // })
+
+      // $resetBtn.on('click', function (e) {
+      //   e.preventDefault()
+      //   socket.emit('reset chat')
+      // })
+
+      // socket.on('reset', function () {
+      //   $allMessages.html('')
+      // })
     })
 
   </script>

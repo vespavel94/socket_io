@@ -11,3 +11,4 @@ frontend/*.suo
 frontend/*.ntvs*
 frontend/*.njsproj
 frontend/*.sln
+/node_modules

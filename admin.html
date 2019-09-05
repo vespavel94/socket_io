@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>admin</title>
+</head>
+<body>
+  <div>
+    <div class="users">
+      <h2>Connected users</h2>
+    </div>
+    
+    <form id="adminForm">
+        <label for="name">Получатель</label>
+        <input type="text" name="name" id="reciever" placeholder="Получатель" class="form-control">
+        <br>
+        <label for="message">Сообщение</label>
+        <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
+        <br>
+        <input type="submit" value="Отправить" class="btn btn-danger">
+      </form>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    $(document).ready(function() {
+      var socket = io.connect()
+      var users = []
+      var $form = $('#adminForm')
+      var $reciever = $('#reciever')
+      var $message = $('#message')
+      $.get('http://localhost:3030/admindata')
+      .then(response => {
+        users = response.users
+        users.forEach(function(user){
+          $('.users').append(`<p>${user}</p>`)
+        })
+      })
+      socket.emit('join', { username: 'admin' })
+
+      $form.submit(function(event) {
+        console.log('triggered')
+        event.preventDefault()
+        socket.emit('adminMessage', {
+          reciever: $reciever.val(),
+          message: $message.val()
+        })
+      })
+
+    })
+  </script>
+</body>
+</html>
