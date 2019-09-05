@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>login</title>
+</head>
+<body>
+  <div>
+    <h1>Login</h1>
+    <input type="text" id="nameinput" placeholder="Name" name="name">
+    <label for="name">Enter your username</label>
+    <button id="login">LOGIN</button>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script>
+    var $loginButton = $('#login')
+    $loginButton.on('click', () => {
+      var username = $('#nameinput').val()
+      $.post('http://localhost:3030/login', {
+        name: username
+      })
+      .then(() => {
+        localStorage.username = username
+        document.location.replace('http://localhost:3030/')
+      })
+    })
+  </script>
+</body>
+</html>

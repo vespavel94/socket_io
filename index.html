@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>socketIo</title>
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+      <h5 id="main-header" class="my-0 mr-md-auto font-weight-normal">Simple chat</h5>
+    </div>
+
+    <div class="container">
+      <div class="py-5 text-center">
+        <h2>Чат программа</h2>
+        <p class="lead">Укажите ваше имя и начинайте переписку</p>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <!-- Форма для получения сообщений и имени -->
+          <h3>Форма сообщений</h3>
+          <form id="messForm">
+            <label for="name">Имя</label>
+            <input type="text" name="name" id="name" placeholder="Введите имя" class="form-control">
+            <br>
+            <label for="message">Сообщение</label>
+            <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
+            <br>
+            <input type="submit" value="Отправить" class="btn btn-danger">
+            <button id="reset" class="btn btn-success">Перезапустить сессию</button>
+          </form>
+        </div>
+        <div class="col-6">
+          <h3>Сообщения</h3>
+          <!-- Вывод всех сообщений будет здесь -->
+          <div id="all_mess"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    $(document).ready(function () {
+      var username = ''
+      if (localStorage.username) {
+        username = localStorage.username
+      } else {
+        document.location.replace('http://localhost:3030/login')
+      }
+      $('#main-header').text(username)
+
+      var socket = io.connect()
+      var $form = $("#messForm")
+      var $textInput = $("#message")
+      var $allMessages = $("#all_mess")
+      var $name = $('#name')
+      var rendered = false
+      var $resetBtn = $("#reset")
+
+      $name.val(username)
+
+      socket.on('render messages', function (messages) {
+        messages.forEach(function (msg) {
+          $allMessages.append(`<div><p><b>${msg.name}</b></p><p>${msg.message}</p></div>`)
+        })
+        socket.removeListener('render messages')
+      })
+
+      $form.submit(function (event) {
+        event.preventDefault()
+        socket.emit('send mess', {
+          name: $name.val(),
+          message: $textInput.val()
+        })
+        $textInput.val('')
+      })
+
+      socket.on('add mess', function (response) {
+        $allMessages.append(`<div><p><b>${response.msg.name}</b></p><p>${response.msg.message}</p></div>`)
+      })
+
+      $resetBtn.on('click', function (e) {
+        e.preventDefault()
+        socket.emit('reset chat')
+      })
+
+      socket.on('reset', function () {
+        $allMessages.html('')
+      })
+    })
+
+  </script>
+</body>
+
+</html>
