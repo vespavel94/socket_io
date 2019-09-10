@@ -28,10 +28,13 @@
           <p><span id="cash">Н.Д</span>$</p>
         </div>
         <div class="col-6">
-          <h3>Сообщения</h3>
+          <h3>Сообщения брокера</h3>
           <!-- Вывод всех сообщений будет здесь -->
           <div id="all_mess"></div>
         </div>
+      </div>
+      <div class="currTime">
+        <p>Current Time is: <span id="current-time"></span></p>
       </div>
     </div>
 
@@ -52,11 +55,11 @@
       // var $adminNotifications = $('#admin-notifications')
       // var $form = $("#messForm")
       // var $textInput = $("#message")
-      // var $allMessages = $("#all_mess")
+      var $allMessages = $("#all_mess")
       // var $name = $('#name')
       // var rendered = false
       // var $resetBtn = $("#reset")
-
+      var $currentTime = $('#current-time')
       // $name.val(username)
       $cash = $('#cash')
 
@@ -67,9 +70,10 @@
 
       socket.on('admin says', function(data) {
         console.log(`Recieved message from admin: ${data.message}`)
+        $allMessages.append(`<p><span><b>Admin</b>: ${data.message}</span></p>`)
       })
 
-      socket.on('login', function(data) {
+      socket.on('send cash', function(data) {
         console.log(data)
         $cash.text(data)
       })
@@ -78,34 +82,9 @@
         console.log(msg)
       })
 
-      // socket.on('render messages', function (messages) {
-      //   messages.forEach(function (msg) {
-      //     $allMessages.append(`<div><p><b>${msg.name}</b></p><p>${msg.message}</p></div>`)
-      //   })
-      //   socket.removeListener('render messages')
-      // })
-
-      // $form.submit(function (event) {
-      //   event.preventDefault()
-      //   socket.emit('send mess', {
-      //     name: $name.val(),
-      //     message: $textInput.val()
-      //   })
-      //   $textInput.val('')
-      // })
-
-      // socket.on('add mess', function (response) {
-      //   $allMessages.append(`<div><p><b>${response.msg.name}</b></p><p>${response.msg.message}</p></div>`)
-      // })
-
-      // $resetBtn.on('click', function (e) {
-      //   e.preventDefault()
-      //   socket.emit('reset chat')
-      // })
-
-      // socket.on('reset', function () {
-      //   $allMessages.html('')
-      // })
+      socket.on('update-time', function (data) {
+        $currentTime.text(data.time)
+      })
     })
 
   </script>

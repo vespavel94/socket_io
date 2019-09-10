@@ -8,10 +8,7 @@ var users = []
 var connections = []
 var messages = []
 var currUser = ''
-var deposit = {
-  pavel: 4000,
-  azazlo: 12000
-}
+var adminSocket = null
 
 function Client (name) {
   this.name = name,
@@ -65,46 +62,35 @@ app.get('/admindata', urlencodedParser, function(request, response) {
 io.sockets.on('connection', function(socket) {
   connections.push(socket)
   socket.on('join', function(data) {
-    if (!users.includes(data.username)) {
-      users.push(data.username)
+    if (data.username === 'admin') {
+      adminSocket = socket
+      adminSocketInit()
+      console.log(adminSocket.id)
+    } else {
+      if (!users.find(x => x.name === data.username)) {
+        users.push(new Client(data.username))
+      }
+      socket.join(data.username)
+      console.log(`User ${data.username} connected`)
+      io.in(data.username).emit('admin says', { message: `Hello, ${data.username}` })
+      users.find(x => x.name === data.username).sendCash()
     }
-    socket.join(data.username)
-    console.log(`User ${data.username} connected`)
-    io.in(data.username).emit('admin says', { message: `Hello, ${data.username}` })
-    sendCash(data.username)
   })
-
-  function sendCash (user) {
-    io.in(user).emit('login', deposit[user])
-  }
-
-  // socket.on('adminMessage', function(data){
-  //   io.sockets.in(data.reciever).emit('admin says', { message: data.message })
-  // })
 })
 
-// io.sockets.on('connection', function(socket) {
-//   io.sockets.emit('render messages', messages)
-//   console.log('connected succesfully')
-//   connections.push(socket)
-  
-//   socket.on('disconnect', function(data) {
-//     connections.splice(connections.indexOf(socket), 1)
-//     console.log('user Disconnected')
-//   })
+setInterval(() => {
+  io.sockets.emit('update-time', { time: new Date().toTimeString().split(' ')[0] })
+}, 1000);
 
-//   socket.on('send mess', function(data) {
-//     messages.push(data)
-//     io.sockets.emit('add mess', {
-//       msg: data
-//     })
-//   })
-
-//   socket.on('reset chat', function() {
-//     messages = []
-//     io.sockets.emit('reset')
-//     console.log(messages)
-//   })
-// })
+function adminSocketInit () {
+  adminSocket.on('adminMessage', function(data) {
+    io.in(data.reciever).emit('admin says', { message: data.message })
+  })
+  adminSocket.on('change cash', function(data) {
+    console.log(data)
+    users.find(x => x.name === data.name).cash += data.change
+    users.find(x => x.name === data.name).sendCash()
+  })
+}
 
 server.listen(3030)

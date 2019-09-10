@@ -21,6 +21,11 @@
         <br>
         <input type="submit" value="Отправить" class="btn btn-danger">
       </form>
+    <hr>
+    <div id="users-info"></div>
+    <div class="currTime">
+      <p>Current Time is: <span id="current-time"></span></p>
+    </div>
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -32,13 +37,10 @@
       var $form = $('#adminForm')
       var $reciever = $('#reciever')
       var $message = $('#message')
-      $.get('http://localhost:3030/admindata')
-      .then(response => {
-        users = response.users
-        users.forEach(function(user){
-          $('.users').append(`<p>${user}</p>`)
-        })
-      })
+      var $usersInfo = $('#users-info')
+      var $currentTime = $('#current-time')
+
+      renderUsersData()
       socket.emit('join', { username: 'admin' })
 
       $form.submit(function(event) {
@@ -50,6 +52,45 @@
         })
       })
 
+      function test() {
+        console.log('treggga')
+      }
+
+      function renderUsersData() {
+        $.get('http://localhost:3030/admindata')
+      .then(response => {
+        $usersInfo.html('')
+        users = response.users
+        users.forEach(function(user) {
+          $usersInfo.append(`
+            <div>
+              <h3>${user.name}</h3>
+              <p>Баланс: <span>${user.cash}</span></p>
+              <div>
+                <button class="cash-btn" id="${user.name + '-incr'}">+100</button>
+                <button class="cash-btn" id="${user.name + '-decr'}">-100</button>  
+              </div>
+            </div>
+          `)
+        })
+        $('.cash-btn').on('click', function () {
+          var name = this.id.slice(0, this.id.indexOf('-'))
+          var operation = this.id.slice(this.id.indexOf('-') + 1)
+          if (operation === 'incr') {
+            socket.emit('change cash', { name: name, change: 100 })
+          }
+          else {
+            socket.emit('change cash', { name: name, change: -100 })
+          }
+          renderUsersData()
+          console.log(operation)
+        })
+      })
+      }
+
+      socket.on('update-time', function (data) {
+        $currentTime.text(data.time)
+      })
     })
   </script>
 </body>
