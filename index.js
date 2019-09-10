@@ -8,6 +8,24 @@ var users = []
 var connections = []
 var messages = []
 var currUser = ''
+var deposit = {
+  pavel: 4000,
+  azazlo: 12000
+}
+
+function Client (name) {
+  this.name = name,
+  this.cash = 5000
+}
+
+Client.prototype.sendCash = function () {
+  io.in(this.name).emit('send cash', this.cash)
+}
+
+Client.prototype.changeCash = function (val) {
+  this.cash += val
+  this.sendCash()
+}
 
 // -----------LOGIN-AJAX-------------------------------------
 
@@ -52,11 +70,17 @@ io.sockets.on('connection', function(socket) {
     }
     socket.join(data.username)
     console.log(`User ${data.username} connected`)
+    io.in(data.username).emit('admin says', { message: `Hello, ${data.username}` })
+    sendCash(data.username)
   })
 
-  socket.on('adminMessage', function(data){
-    io.sockets.in(data.reciever).emit('admin says', { message: data.message })
-  })
+  function sendCash (user) {
+    io.in(user).emit('login', deposit[user])
+  }
+
+  // socket.on('adminMessage', function(data){
+  //   io.sockets.in(data.reciever).emit('admin says', { message: data.message })
+  // })
 })
 
 // io.sockets.on('connection', function(socket) {

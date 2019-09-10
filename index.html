@@ -24,17 +24,8 @@
       <div class="row">
         <div class="col-6">
           <!-- Форма для получения сообщений и имени -->
-          <h3>Форма сообщений</h3>
-          <form id="messForm">
-            <label for="name">Имя</label>
-            <input type="text" name="name" id="name" placeholder="Введите имя" class="form-control">
-            <br>
-            <label for="message">Сообщение</label>
-            <textarea name="message" id="message" class="form-control" placeholder="Введите сообщение"></textarea>
-            <br>
-            <input type="submit" value="Отправить" class="btn btn-danger">
-            <button id="reset" class="btn btn-success">Перезапустить сессию</button>
-          </form>
+          <h3>Ваш счет</h3>
+          <p><span id="cash">Н.Д</span>$</p>
         </div>
         <div class="col-6">
           <h3>Сообщения</h3>
@@ -42,10 +33,6 @@
           <div id="all_mess"></div>
         </div>
       </div>
-    </div>
-
-    <div id="admin-notifications">
-      <h1>Admin notifications</h1>
     </div>
 
   </div>
@@ -62,24 +49,35 @@
       $('#main-header').text(username)
 
       var socket = io.connect()
-      var $adminNotifications = $('#admin-notifications')
-      var $form = $("#messForm")
-      var $textInput = $("#message")
-      var $allMessages = $("#all_mess")
-      var $name = $('#name')
-      var rendered = false
-      var $resetBtn = $("#reset")
+      // var $adminNotifications = $('#admin-notifications')
+      // var $form = $("#messForm")
+      // var $textInput = $("#message")
+      // var $allMessages = $("#all_mess")
+      // var $name = $('#name')
+      // var rendered = false
+      // var $resetBtn = $("#reset")
 
-      $name.val(username)
+      // $name.val(username)
+      $cash = $('#cash')
 
       socket.emit('join', { username: username })
-      $form.submit(function(event) {
-        event.preventDefault()
-      })
+      // $form.submit(function(event) {
+      //   event.preventDefault()
+      // })
 
       socket.on('admin says', function(data) {
         console.log(`Recieved message from admin: ${data.message}`)
       })
+
+      socket.on('login', function(data) {
+        console.log(data)
+        $cash.text(data)
+      })
+
+      socket.on('joined', function(msg){
+        console.log(msg)
+      })
+
       // socket.on('render messages', function (messages) {
       //   messages.forEach(function (msg) {
       //     $allMessages.append(`<div><p><b>${msg.name}</b></p><p>${msg.message}</p></div>`)
